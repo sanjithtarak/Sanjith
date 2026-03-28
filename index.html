@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeFlow - Blood Bank Management System</title>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --primary-color: #e63946; /* Blood Red */
+            --secondary-color: #1d3557; /* Dark Blue */
+            --accent-color: #457b9d; /* Muted Blue */
+            --light-bg: #f1faee;
+            --white: #ffffff;
+            --gray: #e9ecef;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #d00000;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header & Navigation */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links li button {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links li button:hover, .nav-links li button.active {
+            color: var(--primary-color);
+        }
+
+        .emergency-cta {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: bold;
+            display: none; /* Visible on mobile drawer or desktop if needed */
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Main Content Container */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            min-height: 80vh;
+        }
+
+        /* Section Visibility Logic */
+        section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        section.active-section {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Homepage Styles */
+        .hero {
+            background: linear-gradient(rgba(29, 53, 87, 0.8), rgba(29, 53, 87, 0.8)), url('https://picsum.photos/seed/bloodbank/1200/600') no-repeat center center/cover;
+            color: var(--white);
+            padding: 4rem 2rem;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #c1121f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray);
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* Dashboard / Search Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-box select, .search-box input {
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: var(--radius);
+            font-size: 1rem;
+        }
+
+        .search-box input {
+            flex-grow: 1;
+        }
+
+        .blood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .blood-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--secondary-color);
+            transition: transform 0.2s;
+        }
+
+        .blood-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .blood-card.low-stock {
+            border-top-color: var(--danger);
+        }
+
+        .blood-card.critical-stock {
+            border-top-color: var(--danger);
+            background-color: #fff0f0;
+        }
+
+        .blood-type {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .units {
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        .units span {
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        /* Forms (Registration & Admin) */
+        .form-container {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        /* Admin Tables */
+        .admin-panel {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: var(--secondary-color);
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-right: 0.3rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .edit-btn {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+
+        .toast {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            margin-top: 10px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 250px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.success { border-left: 5px solid var(--success); }
+        .toast.error { border-left: 5px solid var(--danger); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: var(--white);
+                padding: 1rem 0;
+                border-top: 1px solid var(--gray);
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--primary-color)" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                LifeFlow <span>BBMS</span>
+            </div>
+            <div class="menu-toggle" id="mobile-menu-btn">☰</div>
+            <ul class="nav-links" id="nav-links">
+                <li><button class="active" onclick="showSection('home')">Home</button></li>
+                <li><button onclick="showSection('dashboard')">Search Blood</button></li>
+                <li><button onclick="showSection('donate')">Donate/Reg</button></li>
+                <li><button onclick="showSection('admin')">Admin</button></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <main>
+        <!-- HOME SECTION -->
+        <section id="home" class="active-section">
+            <div class="hero">
+                <h1>Every Drop Counts</h1>
+                <p>Connecting blood donors with those in need. Fast, reliable, and life-saving.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="showSection('dashboard')">Find Blood Now</button>
+                    <button class="btn btn-secondary" onclick="showSection('donate')">Become a Donor</button>
+                </div>
+                <div style="margin-top: 2rem; font-weight: bold; background: rgba(0,0,0,0.3); display: inline-block; padding: 0.5rem 1rem; border-radius: 4px;">
+                    🚨 Emergency Hotline: 911 / 555-BLOOD
+                </div>
+            </div>
+
+            <div class="info-cards">
+                <div class="card">
+                    <h3>Our Mission</h3>
+                    <p>To ensure that safe blood is available to every patient in need, whenever and wherever it is required.</p>
+                </div>
+                <div class="card">
+                    <h3>Why Donate?</h3>
+                    <p>One donation can save up to three lives. Your contribution matters more than you think.</p>
+                </div>
+                <div class="card">
+                    <h3>Process</h3>
+                    <p>Registration -> Screening -> Donation -> Refreshment. It takes less than 30 minutes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboard">
+            <div class="dashboard-header">
+                <h2>Blood Availability Dashboard</h2>
+                <div class="search-box">
+                    <select id="filter-group">
+                        <option value="All">All Blood Groups</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="filterBlood()">Search</button>
+                </div>
+            </div>
+            
+            <div id="blood-grid" class="blood-grid">
+                <!-- Blood cards injected via JS -->
+            </div>
+        </section>
+
+        <!-- DONOR REGISTRATION SECTION -->
+        <section id="donate">
+            <div class="form-container">
+                <h2 style="text-align: center; margin-bottom: 1.5rem; color: var(--primary-color);">Donor Registration</h2>
+                <form id="donor-form" onsubmit="handleDonorSubmit(event)">
+                    <div class="form-group">
+                        <label for="donor-name">Full Name</label>
+                        <input type="text" id="donor-name" placeholder="John Doe" required>
+                        <div class="error-msg" id="err-name">Name is required.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="donor-age">Age</label>
+                        <input type="number" id="donor-age" placeholder="18-65" min="18" max="65" required>
+                        <div class="error-msg" id="err-age">Age must be between 18 and 65.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="donor-group">Blood Group</label>
+                        <select id="donor-group" required>
+                            <option value="">Select Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                        <div class="error-msg" id="err-group">Please select a blood group.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="donor-contact">Contact Number</label>
+                        <input type="tel" id="donor-contact" placeholder="555-0123" pattern="[0-9\-\+\s]{7,15}" required>
+                        <div class="error-msg" id="err-contact">Enter a valid phone number.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="donor-date">Last Donation Date</label>
+                        <input type="date" id="donor-date" required>
+                        <div class="error-msg" id="err-date">Date is required.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Register Donor</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ADMIN SECTION -->
+        <section id="admin">
+            <div class="admin-panel">
+                <h2 style="margin-bottom: 1.5rem;">Admin Management</h2>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchAdminTab('stock')">Manage Stock</button>
+                    <button class="tab-btn" onclick="switchAdminTab('donors')">Donor List</button>
+                </div>
+
+                <!-- Stock Management Tab -->
+                <div id="tab-stock">
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                            <label>Blood Group</label>
+                            <select id="admin-group">
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                            <label>Units to Add/Remove</label>
+                            <input type="number" id="admin-units" placeholder="e.g. 5" min="1" required>
+                        </div>
+                        <button class="btn btn-primary" onclick="updateStock()">Update Stock</button>
+                    </div>
+
+                    <h3>Current Inventory</h3>
+                    <div class="table-container">
+                        <table id="stock-table">
+                            <thead>
+                                <tr>
+                                    <th>Blood Group</th>
+                                    <th>Available Units</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Stock rows injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Donor List Tab -->
+                <div id="tab-donors" style="display: none;">
+                    <h3>Registered Donors</h3>
+                    <div class="table-container">
+                        <table id="donor-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Group</th>
+                                    <th>Age</th>
+                                    <th>Contact</th>
+                                    <th>Last Donation</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Donor rows injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- DATA MANAGEMENT ---
+
+        // Default data if localStorage is empty
+        const defaultStock = [
+            { group: 'A+', units: 10 },
+            { group: 'A-', units: 5 },
+            { group: 'B+', units: 15 },
+            { group: 'B-', units: 3 },
+            { group: 'AB+', units: 7 },
+            { group: 'AB-', units: 2 },
+            { group: 'O+', units: 20 },
+            { group: 'O-', units: 4 }
+        ];
+
+        const defaultDonors = [
+            { id: 1, name: 'Alice Smith', age: 29, group: 'O+', contact: '555-0101', lastDate: '2023-10-15' },
+            { id: 2, name: 'Bob Jones', age: 35, group: 'A-', contact: '555-0202', lastDate: '2023-09-20' }
+        ];
+
+        // Load data from LocalStorage or use defaults
+        function getStock() {
+            const stored = localStorage.getItem('bloodStock');
+            return stored ? JSON.parse(stored) : defaultStock;
+        }
+
+        function saveStock(stock) {
+            localStorage.setItem('bloodStock', JSON.stringify(stock));
+        }
+
+        function getDonors() {
+            const stored = localStorage.getItem('donorList');
+            return stored ? JSON.parse(stored) : defaultDonors;
+        }
+
+        function saveDonors(donors) {
+            localStorage.setItem('donorList', JSON.stringify(donors));
+        }
+
+        // Initialize Data if not present
+        if (!localStorage.getItem('bloodStock')) saveStock(defaultStock);
+        if (!localStorage.getItem('donorList')) saveDonors(defaultDonors);
+
+
+        // --- NAVIGATION & UI ---
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('main section').forEach(sec => {
+                sec.classList.remove('active-section');
+            });
+            // Show target section
+            document.getElementById(sectionId).classList.add('active-section');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-links button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Highlight correct nav button (simplified matching)
+            const navBtns = document.querySelectorAll('.nav-links button');
+            if(sectionId === 'home') navBtns[0].classList.add('active');
+            if(sectionId === 'dashboard') {
+                navBtns[1].classList.add('active');
+                renderBloodDashboard(); // Refresh view
+            }
+            if(sectionId === 'donate') navBtns[2].classList.add('active');
+            if(sectionId === 'admin') {
+                navBtns[3].classList.add('active');
+                renderAdminStock();
+                renderAdminDonors();
+            }
+
+            // Close mobile menu if open
+            document.getElementById('nav-links').classList.remove('open');
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('nav-links').classList.toggle('open');
+        });
+
+        function switchAdminTab(tabName) {
+            const stockTab = document.getElementById('tab-stock');
+            const donorsTab = document.getElementById('tab-donors');
+            const btns = document.querySelectorAll('.tab-btn');
+
+            if (tabName === 'stock') {
+                stockTab.style.display = 'block';
+                donorsTab.style.display = 'none';
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+                renderAdminStock();
+            } else {
+                stockTab.style.display = 'none';
+                donorsTab.style.display = 'block';
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+                renderAdminDonors();
+            }
+        }
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span> <span style="cursor:pointer" onclick="this.parentElement.remove()">✕</span>`;
+            
+            container.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- DASHBOARD LOGIC ---
+
+        function renderBloodDashboard(filter = 'All') {
+            const stock = getStock();
+            const grid = document.getElementById('blood-grid');
+            grid.innerHTML = '';
+
+            stock.forEach(item => {
+                if (filter !== 'All' && item.group !== filter) return;
+
+                const card = document.createElement('div');
+                card.className = 'blood-card';
+                
+                // Color coding based on stock level
+                if (item.units === 0) {
+                    card.classList.add('critical-stock');
+                } else if (item.units < 5) {
+                    card.classList.add('low-stock');
+                }
+
+                card.innerHTML = `
+                    <div class="blood-type">${item.group}</div>
+                    <div class="units"><span>${item.units}</span> Units</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            if (grid.innerHTML === '') {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">No records found.</p>';
+            }
+        }
+
+        function filterBlood() {
+            const group = document.getElementById('filter-group').value;
+            renderBloodDashboard(group);
+        }
+
+        // --- DONOR REGISTRATION LOGIC ---
+
+        function handleDonorSubmit(e) {
+            e.preventDefault();
+            
+            // Get values
+            const name = document.getElementById('donor-name').value.trim();
+            const age = parseInt(document.getElementById('donor-age').value);
+            const group = document.getElementById('donor-group').value;
+            const contact = document.getElementById('donor-contact').value.trim();
+            const date = document.getElementById('donor-date').value;
+
+            // Validation
+            let isValid = true;
+            
+            // Simple validation checks
+            if (name.length < 2) {
+                document.getElementById('err-name').style.display = 'block';
+                isValid = false;
+            } else document.getElementById('err-name').style.display = 'none';
+
+            if (isNaN(age) || age < 18 || age > 65) {
+                document.getElementById('err-age').style.display = 'block';
+                isValid = false;
+            } else document.getElementById('err-age').style.display = 'none';
+
+            if (group === '') {
+                document.getElementById('err-group').style.display = 'block';
+                isValid = false;
+            } else document.getElementById('err-group').style.display = 'none';
+
+            if (contact.length < 7) {
+                document.getElementById('err-contact').style.display = 'block';
+                isValid = false;
+            } else document.getElementById('err-contact').style.display = 'none';
+
+            if (!date) {
+                document.getElementById('err-date').style.display = 'block';
+                isValid = false;
+            } else document.getElementById('err-date').style.display = 'none';
+
+            if (!isValid) return;
+
+            // Create Donor Object
+            const donors = getDonors();
+            const newDonor = {
+                id: Date.now(),
+                name,
+                age,
+                group,
+                contact,
+                lastDate: date
+            };
+
+            donors.push(newDonor);
+            saveDonors(donors);
+
+            // Reset form and show success
+            e.target.reset();
+            showToast('Donor registered successfully!', 'success');
+        }
+
+        // --- ADMIN LOGIC ---
+
+        function renderAdminStock() {
+            const stock = getStock();
+            const tbody = document.querySelector('#stock-table tbody');
+            tbody.innerHTML = '';
+
+            stock.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                let statusText = '<span style="color: green; font-weight:bold;">Normal</span>';
+                if (item.units === 0) statusText = '<span style="color: red; font-weight:bold;">Out of Stock</span>';
+                else if (item.units < 5) statusText = '<span style="color: orange; font-weight:bold;">Low</span>';
+
+                tr.innerHTML = `
+                    <td><strong>${item.group}</strong></td>
+                    <td>${item.units}</td>
+                    <td>${statusText}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editStock(${index})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="resetStock(${index})">Reset</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateStock() {
+            const group = document.getElementById('admin-group').value;
+            const unitsVal = document.getElementById('admin-units').value;
+            const units = parseInt(unitsVal);
+
+            if (!unitsVal || isNaN(units) || units <= 0) {
+                showToast('Please enter a valid unit amount.', 'error');
+                return;
+            }
+
+            const stock = getStock();
+            const index = stock.findIndex(s => s.group === group);
+
+            if (index !== -1) {
+                // For this demo, we will just add units. 
+                // A real app might ask "Add or Remove".
+                // Let's implement logic: if negative input removes, positive adds? 
+                // The UI says "Units to Add/Remove", so let's assume positive adds.
+                stock[index].units += units;
+                saveStock(stock);
+                
+                // Update UIs
+                renderAdminStock();
+                renderBloodDashboard(); // Update dashboard background data
+                
+                showToast(`Updated ${group} stock. Current: ${stock[index].units}`, 'success');
+                document.getElementById('admin-units').value = '';
+            } else {
+                showToast('Blood group not found.', 'error');
+            }
+        }
+
+        function editStock(index) {
+            const stock = getStock();
+            const newUnits = prompt(`Enter new unit count for ${stock[index].group}:`, stock[index].units);
+            
+            if (newUnits !== null && !isNaN(newUnits) && newUnits.trim() !== '') {
+                stock[index].units = parseInt(newUnits);
+                saveStock(stock);
+                renderAdminStock();
+                showToast('Stock updated manually.', 'success');
+            }
+        }
+
+        function resetStock(index) {
+            if(confirm('Are you sure you want to reset this stock to 0?')) {
+                const stock = getStock();
+                stock[index].units = 0;
+                saveStock(stock);
+                renderAdminStock();
+                showToast('Stock reset to 0.', 'warning');
+            }
+        }
+
+        function renderAdminDonors() {
+            const donors = getDonors();
+            const tbody = document.querySelector('#donor-table tbody');
+            tbody.innerHTML = '';
+
+            donors.forEach((donor, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${donor.name}</td>
+                    <td><span style="background:#e9ecef; padding:2px 6px; border-radius:4px;">${donor.group}</span></td>
+                    <td>${donor.age}</td>
+                    <td>${donor.contact}</td>
+                    <td>${donor.lastDate}</td>
+                    <td>
+                        <button class="action-btn delete-btn" onclick="deleteDonor(${index})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (donors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No donors registered yet.</td></tr>';
+            }
+        }
+
+        function deleteDonor(index) {
+            if (confirm('Delete this donor record?')) {
+                const donors = getDonors();
+                donors.splice(index, 1);
+                saveDonors(donors);
+                renderAdminDonors();
+                showToast('Donor record deleted.', 'success');
+            }
+        }
+
+        // --- INITIALIZATION ---
+        // Render the dashboard initially so data is visible
+        renderBloodDashboard();
+
+    </script>
+</body>
+</html>
